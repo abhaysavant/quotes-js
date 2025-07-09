@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        :root {
+            --primary-color: #5e72e4;
+            --secondary-color: #f7fafc;
+            --danger-color: #f5365c;
+            --success-color: #2dce89;
+            --dark-color: #32325d;
+            --light-color: #ffffff;
+            --shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--secondary-color), #e6f0ff);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-container {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            padding: 2rem 3rem;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .timer-title {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            min-width: 120px;
+        }
+
+        .btn-start {
+            background-color: var(--success-color);
+            color: var(--light-color);
+        }
+
+        .btn-stop {
+            background-color: var(--danger-color);
+            color: var(--light-color);
+        }
+
+        .btn-reset {
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .input-group {
+            margin: 1.5rem 0;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .input-field {
+            padding: 0.8rem;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 80px;
+            text-align: center;
+            transition: border 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .label {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        .time-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+      
+    </style>
+</head>
+<body>
+    <div class="timer-container">
+        <h1 class="timer-title">Countdown Timer</h1>
+        
+        <div class="input-group">
+            <div class="time-input">
+                <span class="label">Hours</span>
+                <input type="number" class="input-field" id="hours" min="0" max="99" value="0">
+            </div>
+            <div class="time-input">
+                <span class="label">Minutes</span>
+                <input type="number" class="input-field" id="minutes" min="0" max="59" value="10">
+            </div>
+            <div class="time-input">
+                <span class="label">Seconds</span>
+                <input type="number" class="input-field" id="seconds" min="0" max="59" value="0">
+            </div>
+        </div>
+        
+        <div class="timer-display" id="display">10:00</div>
+        
+        <div class="timer-controls">
+            <button class="btn btn-start" id="startBtn">Start</button>
+            <button class="btn btn-stop" id="stopBtn">Stop</button>
+            <button class="btn btn-reset" id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+
+        let timer;
+        let totalSeconds = 0;
+        let isRunning = false;
+
+        initTimer();
+
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        hoursInput.addEventListener('change', validateInput);
+        minutesInput.addEventListener('change', validateInput);
+        secondsInput.addEventListener('change', validateInput);
+
+        function initTimer() {
+            updateDisplay();
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            
+            if (timer === undefined || !isRunning) {
+                totalSeconds = 
+                    parseInt(hoursInput.value) * 3600 +
+                    parseInt(minutesInput.value) * 60 +
+                    parseInt(secondsInput.value);
+                
+                if (totalSeconds <= 0) {
+                    alert('Please set a valid time duration');
+                    return;
+                }
+            }
+            
+            isRunning = true;
+            
+            timer = setInterval(() => {
+                totalSeconds--;
+                
+                if (totalSeconds <= 0) {
+                    clearInterval(timer);
+                    isRunning = false;
+                    alert('Countdown complete!');
+                }
+                
+                updateDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (!isRunning) return;
+            
+            clearInterval(timer);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timer = undefined;
+            hoursInput.value = 0;
+            minutesInput.value = 0;
+            secondsInput.value = 0;
+            totalSeconds = 
+                parseInt(hoursInput.value) * 3600 +
+                parseInt(minutesInput.value) * 60 +
+                parseInt(secondsInput.value);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            display.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            
+            if (!isRunning) {
+                hoursInput.value = hours;
+                minutesInput.value = minutes;
+                secondsInput.value = seconds;
+            }
+        }
+
+        function validateInput() {
+            const maxValues = {
+                hours: 99,
+                minutes: 59,
+                seconds: 59
+            };
+            
+            const inputs = {
+                hours: hoursInput,
+                minutes: minutesInput,
+                seconds: secondsInput
+            };
+            
+            for (const [unit, input] of Object.entries(inputs)) {
+                let value = parseInt(input.value);
+                if (isNaN(value)) value = 0;
+                input.value = Math.min(Math.max(value, 0), maxValues[unit]);
+            }
+        }
+
+        
+    </script>
+</body>
+</html>
